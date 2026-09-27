@@ -45,6 +45,9 @@ def test_cross_validation_outputs(train_xy):
     counts = oof.groupby(["model", "repeat"])["row_index"].agg(["size", "nunique"])
     assert (counts["size"] == len(X)).all()
     assert (counts["nunique"] == len(X)).all()
+    # Fold ids on predictions match the per-fold metrics.
+    assert set(oof["fold"]) == set(result.fold_metrics["fold"])
+    assert oof.groupby("fold")["repeat"].nunique().eq(1).all()
 
 
 def test_cross_validation_is_reproducible(train_xy):

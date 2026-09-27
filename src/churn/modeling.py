@@ -56,7 +56,7 @@ def make_baseline_pipeline(name: str) -> Pipeline:
 @dataclass
 class CVResult:
     fold_metrics: pd.DataFrame  # one row per (model, fold)
-    oof_predictions: pd.DataFrame  # one row per (model, repeat, training row)
+    oof_predictions: pd.DataFrame  # one row per (model, repeat, training row), with its fold id
 
 
 def cross_validate_models(
@@ -97,6 +97,7 @@ def cross_validate_models(
             oof_frames.append(pd.DataFrame({
                 "model": name,
                 "repeat": fold_id // n_splits,
+                "fold": fold_id,
                 "row_index": X_val.index,
                 "y_true": y_val.to_numpy(),
                 "proba": val_proba,

@@ -13,3 +13,7 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+filterwarnings = [
+    # Raised inside shap's plotting module at import time (matplotlib API change); not our code.
+    "ignore::PendingDeprecationWarning:shap.*",
+]

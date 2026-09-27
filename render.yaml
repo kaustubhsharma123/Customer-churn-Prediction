@@ -1,0 +1,16 @@
+# Render Blueprint for the FastAPI backend (free web service, native Python runtime).
+# The model artifact is built from source during the build step: the dataset is
+# downloaded and checksum-verified, then the locked configuration is trained on the
+# training split. No binary is stored in git. The Streamlit UI is deployed separately
+# (Streamlit Community Cloud); see README "Deployment".
+services:
+  - type: web
+    name: churn-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && python -m churn.data && python -m churn.train
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.4

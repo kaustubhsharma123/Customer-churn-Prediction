@@ -25,9 +25,10 @@ Built incrementally in 14 phases, with every modelling decision made on training
 15. [Streamlit frontend](#streamlit-frontend)
 16. [Testing and validation](#testing-and-validation)
 17. [Setup and run instructions](#setup-and-run-instructions)
-18. [Known limitations](#known-limitations)
-19. [Future improvements](#future-improvements)
-20. [Interview talking points](#interview-talking-points)
+18. [Deployment](#deployment)
+19. [Known limitations](#known-limitations)
+20. [Future improvements](#future-improvements)
+21. [Interview talking points](#interview-talking-points)
 
 ---
 
@@ -50,7 +51,7 @@ This system answers: **"How likely is this customer to churn, should we act, and
 - SHAP and grouped permutation importance, with correlated features handled explicitly.
 - Versioned model artifact with metadata and an integrity checksum.
 - FastAPI service with strict request validation; Streamlit UI that only talks to the API.
-- 213 automated tests, including end-to-end integration tests and a live smoke test.
+- 214 automated tests, including end-to-end integration tests and a live smoke test.
 
 ## Architecture and data flow
 
@@ -91,10 +92,12 @@ This system answers: **"How likely is this customer to churn, should we act, and
 ├── app/                        # Streamlit UI (streamlit_app.py, api_client.py, inputs.py)
 ├── notebooks/                  # 01_eda … 06_explainability (analysis; import from src/)
 ├── reports/                    # CV/test results (CSV/JSON), locked decisions, figures/
-├── models/                     # artifact metadata (.json); .joblib is built locally
+├── models/                     # build outputs of `python -m churn.train` (git-ignored)
 ├── scripts/e2e_smoke.py        # live Streamlit → FastAPI → artifact smoke test
-├── tests/                      # 213 pytest tests
+├── tests/                      # 214 pytest tests
 ├── data/raw/, data/processed/  # git-ignored; dataset is downloaded, not committed
+├── render.yaml                 # API deployment blueprint (Render, free tier)
+├── docs/portfolio_summary.md   # one-page project summary
 ├── pyproject.toml, requirements.txt
 ```
 
@@ -220,7 +223,7 @@ Tuned HistGradientBoosting beat tuned Logistic Regression by ROC-AUC +0.003 (3.2
 
 Honest assessment: tuning removed the tree models' overfitting, but the gain over the best baseline is **statistically consistent yet practically small** (ROC-AUC 0.846 → 0.850). Tuned Logistic Regression remains a near-equivalent, more interpretable alternative.
 
-### Final locked model (`reports/locked_decisions_tuned.json`, `models/churn_pipeline_v1.0.0.json`)
+### Final locked model (`reports/locked_decisions_tuned.json`)
 
 | Item | Value |
 |---|---|
@@ -268,14 +271,19 @@ For the final model, fitted on the training split (`notebooks/06_explainability.
 
 ## Production artifact and inference
 
-`python -m churn.train` fits the locked configuration on the 5,634 training rows and writes:
+`python -m churn.train` fits the locked configuration (read from `reports/locked_decisions_tuned.json`) on the 5,634 training rows and writes:
 
-| File | Contents | In git? |
-|---|---|---|
-| `models/churn_pipeline_v1.0.0.joblib` | Fitted `Pipeline` (preprocessing + model), ~300 KB | **No** — rebuilt locally |
-| `models/churn_pipeline_v1.0.0.json` | Version, hyperparameters, threshold, risk bands, input schema, training-data fingerprint, library versions, SHA-256 of the `.joblib` | Yes |
+| File | Contents |
+|---|---|
+| `models/churn_pipeline_v1.0.0.joblib` | Fitted `Pipeline` (preprocessing + model), ~300 KB |
+| `models/churn_pipeline_v1.0.0.json` | Version, creation time, hyperparameters, threshold, risk bands, input schema, training-data fingerprint, library versions, SHA-256 of the `.joblib` |
 
-**Why the `.joblib` is git-ignored:** binary artifacts bloat git history, and a pickled scikit-learn object is only guaranteed to load with the same library version. It is fully reproducible: retraining produces identical predictions (verified by tests). The committed metadata documents exactly what the artifact contains.
+**Artifact strategy: build from source, never commit.** Both files are git-ignored build outputs.
+
+- The build is deterministic: from the checksum-verified dataset and the locked decision, retraining reproduced a byte-identical `.joblib` (same SHA-256) and identical predictions (also checked by the integration tests).
+- A pickled scikit-learn object is only guaranteed to load with the scikit-learn version that created it; building in the target environment avoids version mismatches. Binary files would also bloat git history.
+- Every environment — a fresh clone, CI, or the deployment build — obtains the artifact the same way: `python -m churn.data` then `python -m churn.train` (a few seconds).
+- What gets built is fixed by committed files: `reports/locked_decisions_tuned.json` (model, hyperparameters, threshold), `src/` (preprocessing), and the dataset checksum.
 
 **Inference (`churn.predict`)**
 
@@ -323,7 +331,7 @@ Response (production model):
 
 ## Testing and validation
 
-**213 tests** (`pytest`), covering:
+**214 tests** (`pytest`), covering:
 
 | Area | Examples |
 |---|---|
@@ -370,6 +378,41 @@ python scripts/e2e_smoke.py
 ```
 
 To point the UI at another API: `$env:CHURN_API_URL = "http://host:8000"` before step 6, or edit the URL in the sidebar.
+
+These steps were verified from a fresh `git clone` into an empty directory with a new virtual environment (tests, artifact build, API, UI, and smoke test all passing).
+
+### Environment variables
+
+| Variable | Used by | Default | Purpose |
+|---|---|---|---|
+| `CHURN_API_URL` | Streamlit UI | `http://127.0.0.1:8000` | Base URL of the FastAPI service |
+| `PORT` | API start command on Render | set by the platform | Port uvicorn listens on |
+| `PYTHON_VERSION` | Render build | `3.12.4` (in `render.yaml`) | Python version for the API service |
+
+No secrets are required: the dataset is public and the API has no credentials. Nothing reads a `.env` file automatically, so no `.env.example` is provided; set variables in the shell or the hosting dashboard.
+
+## Deployment
+
+The two services are deployed separately, both on free tiers, with no binaries in git.
+
+**1. API → Render (free web service).** `render.yaml` is a Render Blueprint:
+
+| Setting | Value |
+|---|---|
+| Build | `pip install -r requirements.txt && python -m churn.data && python -m churn.train` |
+| Start | `uvicorn api.main:app --host 0.0.0.0 --port $PORT` |
+| Health check | `/health` (returns 503 until the model is loaded) |
+
+In Render: **New → Blueprint → select this repository**. The build downloads and checksum-verifies the dataset, then builds the artifact from the locked decision. Free instances sleep when idle, so the first request after a pause is slow.
+
+**2. UI → Streamlit Community Cloud (free).** Create an app from this repository with:
+
+- Main file: `app/streamlit_app.py`; Python version: 3.12 (dependencies come from the root `requirements.txt`).
+- Secrets: `CHURN_API_URL = "https://<your-render-service>.onrender.com"`. Root-level Streamlit secrets are exposed as environment variables, which the UI reads.
+
+The UI calls the API from the Streamlit server (not the browser), so no CORS configuration is needed.
+
+**Local production-style run:** `uvicorn api.main:app --host 0.0.0.0 --port 8000` and `streamlit run app/streamlit_app.py --server.address 0.0.0.0`.
 
 ## Known limitations
 

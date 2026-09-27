@@ -11,6 +11,7 @@ venv/
 
 # --- Secrets / local config ---
 .env
+.streamlit/secrets.toml
 
 # --- Tooling caches ---
 .pytest_cache/
@@ -25,9 +26,11 @@ data/raw/*
 data/processed/*
 !data/processed/.gitkeep
 
-# --- Model artifacts: binaries kept out of git history (revisited in Phase 14) ---
+# --- Model artifacts: build outputs of `python -m churn.train` (deterministic from
+#     the locked decision in reports/locked_decisions_tuned.json), never committed ---
 models/*.joblib
 models/*.pkl
+models/*.json
 
 # --- OS / editor ---
 .DS_Store

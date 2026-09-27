@@ -1,0 +1,157 @@
+{
+  "model_version": "1.0.0",
+  "created_at_utc": "2026-09-27T22:10:40+00:00",
+  "model": "HistGradientBoosting",
+  "hyperparameters": {
+    "model__l2_regularization": 5.626265699005659,
+    "model__learning_rate": 0.015836308681309343,
+    "model__max_depth": 5,
+    "model__max_iter": 300,
+    "model__max_leaf_nodes": 7,
+    "model__min_samples_leaf": 200
+  },
+  "threshold": 0.3,
+  "threshold_rule": "highest precision with out-of-fold recall >= 0.75",
+  "risk_levels": {
+    "LOW": [
+      0.0,
+      0.3
+    ],
+    "MEDIUM": [
+      0.3,
+      0.6
+    ],
+    "HIGH": [
+      0.6,
+      1.0
+    ]
+  },
+  "input_schema": {
+    "features": [
+      "tenure",
+      "MonthlyCharges",
+      "TotalCharges",
+      "gender",
+      "SeniorCitizen",
+      "Partner",
+      "Dependents",
+      "PaperlessBilling",
+      "MultipleLines",
+      "InternetService",
+      "OnlineSecurity",
+      "OnlineBackup",
+      "DeviceProtection",
+      "TechSupport",
+      "StreamingTV",
+      "StreamingMovies",
+      "Contract",
+      "PaymentMethod"
+    ],
+    "numeric": [
+      "tenure",
+      "MonthlyCharges",
+      "TotalCharges"
+    ],
+    "categorical": {
+      "gender": [
+        "Female",
+        "Male"
+      ],
+      "SeniorCitizen": [
+        0,
+        1
+      ],
+      "Partner": [
+        "No",
+        "Yes"
+      ],
+      "Dependents": [
+        "No",
+        "Yes"
+      ],
+      "PaperlessBilling": [
+        "No",
+        "Yes"
+      ],
+      "MultipleLines": [
+        "No",
+        "No phone service",
+        "Yes"
+      ],
+      "InternetService": [
+        "DSL",
+        "Fiber optic",
+        "No"
+      ],
+      "OnlineSecurity": [
+        "No",
+        "No internet service",
+        "Yes"
+      ],
+      "OnlineBackup": [
+        "No",
+        "No internet service",
+        "Yes"
+      ],
+      "DeviceProtection": [
+        "No",
+        "No internet service",
+        "Yes"
+      ],
+      "TechSupport": [
+        "No",
+        "No internet service",
+        "Yes"
+      ],
+      "StreamingTV": [
+        "No",
+        "No internet service",
+        "Yes"
+      ],
+      "StreamingMovies": [
+        "No",
+        "No internet service",
+        "Yes"
+      ],
+      "Contract": [
+        "Month-to-month",
+        "One year",
+        "Two year"
+      ],
+      "PaymentMethod": [
+        "Bank transfer (automatic)",
+        "Credit card (automatic)",
+        "Electronic check",
+        "Mailed check"
+      ]
+    }
+  },
+  "training_data": {
+    "source_sha256": "16320c9c1ec72448db59aa0a26a0b95401046bef5d02fd3aeb906448e3055e91",
+    "split": {
+      "test_size": 0.2,
+      "stratified": true,
+      "random_state": 42
+    },
+    "rows": 5634,
+    "churn_rate": 0.2654,
+    "test_set_used_for_fitting": false
+  },
+  "cv_metrics_at_threshold": {
+    "roc_auc": 0.8496,
+    "pr_auc": 0.669,
+    "precision": 0.5458,
+    "recall": 0.7596,
+    "f1": 0.6348,
+    "brier": 0.1337,
+    "log_loss": 0.4126
+  },
+  "environment": {
+    "python": "3.12.4",
+    "scikit-learn": "1.9.1",
+    "pandas": "3.0.6",
+    "numpy": "2.5.3",
+    "joblib": "1.6.0"
+  },
+  "artifact_sha256": "a5147fbf3443a10d2462e6089710f851cfc60675a571f5820a2ac86c4b3214b1"
+}

@@ -18,5 +18,9 @@ FIGURES_DIR = REPORTS_DIR / "figures"
 
 RAW_DATA_FILE = RAW_DATA_DIR / "Telco-Customer-Churn.csv"
 
+# Production model: locked training/CV decision (Phase 7) and artifact version.
+LOCKED_DECISION_FILE = REPORTS_DIR / "locked_decisions_tuned.json"
+MODEL_VERSION = "1.0.0"
+
 # Single seed used for every split and model so results are reproducible.
 RANDOM_STATE = 42

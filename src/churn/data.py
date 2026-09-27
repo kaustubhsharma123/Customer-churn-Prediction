@@ -16,8 +16,9 @@ import urllib.request
 from pathlib import Path
 
 import pandas as pd
+from sklearn.model_selection import train_test_split
 
-from churn.config import RAW_DATA_FILE
+from churn.config import RANDOM_STATE, RAW_DATA_FILE
 
 logger = logging.getLogger(__name__)
 
@@ -226,6 +227,19 @@ def load_dataset(path: Path = RAW_DATA_FILE) -> pd.DataFrame:
 def split_features_target(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
     """Return model features X (identifier and target removed) and target y."""
     return df[FEATURE_COLUMNS].copy(), df[TARGET_COLUMN].copy()
+
+
+def split_train_test(
+    df: pd.DataFrame, test_size: float = 0.2, random_state: int = RANDOM_STATE
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Stratified train/test split, so both sets keep the overall churn rate.
+
+    The test set is held out until final evaluation; all model selection
+    happens with cross-validation on the training set.
+    """
+    return train_test_split(
+        df, test_size=test_size, stratify=df[TARGET_COLUMN], random_state=random_state
+    )
 
 
 def summarize(df: pd.DataFrame) -> str:

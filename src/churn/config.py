@@ -15,5 +15,7 @@ PROCESSED_DATA_DIR = DATA_DIR / "processed"
 MODELS_DIR = PROJECT_ROOT / "models"
 FIGURES_DIR = PROJECT_ROOT / "reports" / "figures"
 
+RAW_DATA_FILE = RAW_DATA_DIR / "Telco-Customer-Churn.csv"
+
 # Single seed used for every split and model so results are reproducible.
 RANDOM_STATE = 42

@@ -49,6 +49,21 @@ python -c "import churn, sklearn, pandas, fastapi, streamlit, shap; print('OK')"
 pytest
 ```
 
+## Dataset
+
+**IBM Telco Customer Churn** (sample data): 7,043 customers of a fictional telecom company, 19 features plus `customerID` and the target `Churn` (26.5% churned).
+
+- **Source:** [IBM/telco-customer-churn-on-icp4d](https://github.com/IBM/telco-customer-churn-on-icp4d) (`data/Telco-Customer-Churn.csv`). The repository is Apache-2.0 licensed; the license does not explicitly address the data file, and IBM has not published separate data terms that we could find. Also mirrored on [Kaggle](https://www.kaggle.com/datasets/blastchar/telco-customer-churn).
+- **Not committed to this repo.** Download and validate it (SHA-256 verified):
+
+```powershell
+python -m churn.data
+```
+
+Known data-quality issues handled in `src/churn/data.py`:
+- `TotalCharges` is stored as text; 11 customers with `tenure == 0` have a blank value, set to `0.0` (not yet billed).
+- `customerID` is an identifier and is excluded from model features.
+
 ## Tech stack
 
 Python · pandas · NumPy · Matplotlib · Seaborn · scikit-learn · SHAP · FastAPI · Pydantic · Streamlit · Joblib · Pytest

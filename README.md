@@ -88,6 +88,25 @@ curl -X POST http://127.0.0.1:8000/predict -H "Content-Type: application/json" -
 
 Invalid input (missing/unknown fields, unknown categories, out-of-range or non-finite numbers, inconsistent services) returns `422` with a list of problems.
 
+## Run the Streamlit app locally
+
+The UI calls the API, so start both, in two terminals from the project root (venv activated):
+
+```powershell
+# Terminal 1 — API
+uvicorn api.main:app
+
+# Terminal 2 — UI (opens http://localhost:8501)
+streamlit run app/streamlit_app.py
+```
+
+The UI uses `http://127.0.0.1:8000` by default. To point it elsewhere, change the URL in the sidebar or set an environment variable before starting it:
+
+```powershell
+$env:CHURN_API_URL = "http://my-api-host:8000"
+streamlit run app/streamlit_app.py
+```
+
 ## Tech stack
 
 Python · pandas · NumPy · Matplotlib · Seaborn · scikit-learn · SHAP · FastAPI · Pydantic · Streamlit · Joblib · Pytest

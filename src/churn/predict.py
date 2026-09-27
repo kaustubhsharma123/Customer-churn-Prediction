@@ -38,6 +38,11 @@ class ModelArtifactError(RuntimeError):
     """The saved model artifact is missing, corrupted, or inconsistent."""
 
 
+REQUIRED_METADATA_KEYS = {
+    "model_version", "artifact_sha256", "threshold", "risk_levels", "input_schema", "environment",
+}
+
+
 @dataclass(frozen=True)
 class ChurnModel:
     pipeline: Pipeline
@@ -73,19 +78,33 @@ def load_model(models_dir: Path = MODELS_DIR, version: str = MODEL_VERSION) -> C
         if not path.exists():
             raise ModelArtifactError(f"Missing {path}. Train it with `python -m churn.train`.")
 
-    metadata = json.loads(metadata_path.read_text())
-    actual_hash = hashlib.sha256(model_path.read_bytes()).hexdigest()
-    if actual_hash != metadata.get("artifact_sha256"):
-        raise ModelArtifactError(f"{model_path} does not match its metadata checksum")
-    if metadata.get("model_version") != version:
-        raise ModelArtifactError(f"Metadata version {metadata.get('model_version')!r} != {version!r}")
+    try:
+        metadata = json.loads(metadata_path.read_text())
+    except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+        raise ModelArtifactError(f"{metadata_path} is not valid JSON") from exc
+    missing = REQUIRED_METADATA_KEYS - set(metadata)
+    if missing:
+        raise ModelArtifactError(f"{metadata_path} is missing {sorted(missing)}")
 
-    trained_with = metadata["environment"]["scikit-learn"]
+    actual_hash = hashlib.sha256(model_path.read_bytes()).hexdigest()
+    if actual_hash != metadata["artifact_sha256"]:
+        raise ModelArtifactError(f"{model_path} does not match its metadata checksum")
+    if metadata["model_version"] != version:
+        raise ModelArtifactError(f"Metadata version {metadata['model_version']!r} != {version!r}")
+
+    trained_with = metadata["environment"].get("scikit-learn")
     if trained_with != sklearn.__version__:
         # Pickled sklearn objects are only guaranteed to load correctly with the same version.
         logger.warning("Model trained with scikit-learn %s, running %s", trained_with, sklearn.__version__)
 
-    return ChurnModel(pipeline=joblib.load(model_path), metadata=metadata)
+    try:
+        pipeline = joblib.load(model_path)
+    except Exception as exc:  # unpickling can fail in many ways; all mean an unusable artifact
+        raise ModelArtifactError(f"Could not load {model_path}: {type(exc).__name__}") from exc
+    if not isinstance(pipeline, Pipeline) or not hasattr(pipeline, "predict_proba"):
+        raise ModelArtifactError(f"{model_path} does not contain a scikit-learn Pipeline")
+
+    return ChurnModel(pipeline=pipeline, metadata=metadata)
 
 
 # --- Validation -------------------------------------------------------------

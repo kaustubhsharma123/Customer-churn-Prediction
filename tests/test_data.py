@@ -119,6 +119,32 @@ def test_validate_reports_all_problems_at_once():
     assert "Contract" in message and "gender" in message and "tenure" in message
 
 
+def test_validate_rejects_inconsistent_phone_service():
+    df = data.clean_data(make_raw_df(make_raw_row(PhoneService="No", MultipleLines="Yes")))
+    with pytest.raises(data.DataValidationError, match="MultipleLines disagrees with PhoneService"):
+        data.validate_data(df)
+
+
+def test_validate_rejects_empty_dataset():
+    empty = data.clean_data(make_raw_df()).iloc[0:0]
+    with pytest.raises(data.DataValidationError, match="empty"):
+        data.validate_data(empty)
+
+
+# --- acquisition -----------------------------------------------------------
+def test_load_raw_data_missing_file_gives_instructions(tmp_path):
+    with pytest.raises(FileNotFoundError, match="python -m churn.data"):
+        data.load_raw_data(tmp_path / "absent.csv")
+
+
+def test_download_rejects_file_with_wrong_checksum(tmp_path):
+    # An existing file is verified, not re-downloaded; a changed file must fail loudly.
+    wrong = tmp_path / "Telco-Customer-Churn.csv"
+    wrong.write_text("customerID\n0001-AAAAA\n")
+    with pytest.raises(data.DataValidationError, match="Checksum mismatch"):
+        data.download_raw_data(wrong)
+
+
 # --- split_features_target ----------------------------------------------
 def test_split_excludes_identifier_and_target():
     X, y = data.split_features_target(data.clean_data(make_raw_df()))

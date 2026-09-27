@@ -1,0 +1,37 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# --- Virtual environments ---
+venv/
+.venv/
+
+# --- Secrets / local config ---
+.env
+
+# --- Tooling caches ---
+.pytest_cache/
+.ipynb_checkpoints/
+.coverage
+htmlcov/
+
+# --- Data: raw data is ignored by default (licence/size decided in Phase 2);
+#     processed data is reproducible from code. Folders kept via .gitkeep. ---
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# --- Model artifacts: binaries kept out of git history (revisited in Phase 14) ---
+models/*.joblib
+models/*.pkl
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

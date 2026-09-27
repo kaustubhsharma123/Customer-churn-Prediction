@@ -1,0 +1,30 @@
+# Tested with Python 3.12.4.
+# Direct dependencies pinned to the exact versions verified in this project.
+
+# --- Data & analysis ---
+pandas==3.0.6
+numpy==2.5.3
+matplotlib==3.11.2
+seaborn==0.13.2
+
+# --- Machine learning ---
+scikit-learn==1.9.1
+shap==0.52.0
+joblib==1.6.0
+
+# --- API ---
+fastapi==0.141.1
+uvicorn[standard]==0.54.0
+pydantic==2.13.5
+
+# --- Frontend ---
+streamlit==1.64.0
+requests==2.34.2
+
+# --- Development & testing ---
+pytest==9.1.1
+httpx==0.28.1
+ipykernel==7.3.0
+
+# --- Install this project's package (src/churn) in editable mode ---
+-e .

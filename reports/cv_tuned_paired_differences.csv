@@ -1,0 +1,21 @@
+comparison,metric,mean_diff,std_error,diff / SE,folds_better
+LogisticRegression (tuned) − LogisticRegression (baseline),roc_auc,0.0001397293204060679,0.00012505360571849294,1.1173553901405395,11/15
+LogisticRegression (tuned) − LogisticRegression (baseline),pr_auc,-0.0007664633845244036,0.0005619795933921004,-1.3638633742873867,6/15
+LogisticRegression (tuned) − LogisticRegression (baseline),brier,-9.778346854695438e-05,4.487383864866488e-05,-2.179075191506125,11/15
+LogisticRegression (tuned) − LogisticRegression (baseline),log_loss,-0.00010440903730902784,0.00013372097497260025,-0.7807977568995552,9/15
+HistGradientBoosting (tuned) − HistGradientBoosting (baseline),roc_auc,0.013008384019714773,0.0012250414321280498,10.61872984746123,15/15
+HistGradientBoosting (tuned) − HistGradientBoosting (baseline),pr_auc,0.019084303422240486,0.0024249709612303473,7.869910084431594,15/15
+HistGradientBoosting (tuned) − HistGradientBoosting (baseline),brier,-0.006203291842906805,0.0004667254441249442,-13.291094198940137,15/15
+HistGradientBoosting (tuned) − HistGradientBoosting (baseline),log_loss,-0.022544162266690697,0.0016657106831304649,-13.534260478129474,15/15
+RandomForest (tuned) − RandomForest (baseline),roc_auc,0.022363922803597017,0.002213559983019867,10.103147407411502,15/15
+RandomForest (tuned) − RandomForest (baseline),pr_auc,0.04406920102726277,0.004221527856874385,10.439159119961738,15/15
+RandomForest (tuned) − RandomForest (baseline),brier,-0.009450440881015355,0.0008982856206491556,-10.520530067247313,15/15
+RandomForest (tuned) − RandomForest (baseline),log_loss,-0.05250087236013375,0.006061107700671872,-8.661926986434187,15/15
+HistGradientBoosting (tuned) − LogisticRegression (tuned),roc_auc,0.003142883377029615,0.0009734179199189832,3.228709183092905,12/15
+HistGradientBoosting (tuned) − LogisticRegression (tuned),pr_auc,0.008609450481684718,0.0023097917629859165,3.7273708477317884,12/15
+HistGradientBoosting (tuned) − LogisticRegression (tuned),brier,-0.0012154106700856778,0.0004318640013036161,-2.8143366115648987,11/15
+HistGradientBoosting (tuned) − LogisticRegression (tuned),log_loss,-0.004171477986143987,0.0011133445597806926,-3.746798733148422,12/15
+RandomForest (tuned) − LogisticRegression (tuned),roc_auc,0.0022737847304744596,0.0011325725088567318,2.0076283970283875,12/15
+RandomForest (tuned) − LogisticRegression (tuned),pr_auc,0.004148269701275383,0.002515946477771391,1.6487909174244013,9/15
+RandomForest (tuned) − LogisticRegression (tuned),brier,-0.0005479875807800257,0.00045816937256953406,-1.1960371285989013,10/15
+RandomForest (tuned) − LogisticRegression (tuned),log_loss,-0.0025484025257469177,0.00142935890527297,-1.782898974040561,12/15

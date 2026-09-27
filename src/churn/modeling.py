@@ -8,6 +8,7 @@ reserved for final evaluation.
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from functools import partial
 
 import pandas as pd
 from sklearn.base import BaseEstimator
@@ -67,23 +68,30 @@ def cross_validate_models(
     n_repeats: int = 3,
     threshold: float = DEFAULT_THRESHOLD,
     random_state: int = RANDOM_STATE,
+    pipeline_factories: dict[str, Callable[[], Pipeline]] | None = None,
 ) -> CVResult:
     """Repeated stratified k-fold CV; all models see identical folds.
 
+    Evaluates the named baselines, or any labelled `pipeline_factories`
+    (each returning a fresh, unfitted Pipeline) such as tuned models.
     Records validation metrics per fold, the training-fold ROC-AUC (to spot
     overfitting), and every out-of-fold predicted probability.
     """
-    model_names = model_names or list(BASELINE_MODELS)
+    if pipeline_factories is None:
+        pipeline_factories = {
+            name: partial(make_baseline_pipeline, name)
+            for name in (model_names or list(BASELINE_MODELS))
+        }
     cv = RepeatedStratifiedKFold(n_splits=n_splits, n_repeats=n_repeats, random_state=random_state)
     folds = list(cv.split(X, y))
 
     metric_rows, oof_frames = [], []
-    for name in model_names:
+    for name, make_pipeline in pipeline_factories.items():
         for fold_id, (train_idx, val_idx) in enumerate(folds):
             X_tr, y_tr = X.iloc[train_idx], y.iloc[train_idx]
             X_val, y_val = X.iloc[val_idx], y.iloc[val_idx]
 
-            pipeline = make_baseline_pipeline(name).fit(X_tr, y_tr)
+            pipeline = make_pipeline().fit(X_tr, y_tr)
             val_proba = pipeline.predict_proba(X_val)[:, 1]
             train_proba = pipeline.predict_proba(X_tr)[:, 1]
 

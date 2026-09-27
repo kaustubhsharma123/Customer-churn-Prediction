@@ -9,6 +9,7 @@ seaborn==0.13.2
 
 # --- Machine learning ---
 scikit-learn==1.9.1
+scipy==1.18.1
 shap==0.52.0
 joblib==1.6.0
 

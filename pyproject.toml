@@ -13,7 +13,9 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]  # lets tests import the top-level `api` package
 filterwarnings = [
     # Raised inside shap's plotting module at import time (matplotlib API change); not our code.
-    "ignore::PendingDeprecationWarning:shap.*",
+    # Matched by message: the reported module varies with import order.
+    "ignore:The set_(bad|over|under) function will be deprecated:PendingDeprecationWarning",
 ]

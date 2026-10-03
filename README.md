@@ -4,6 +4,16 @@ An end-to-end machine learning system that estimates how likely a telecom custom
 
 Built incrementally in 14 phases, with every modelling decision made on training data and cross-validation, and a held-out test set protected from tuning.
 
+## Project Preview
+
+### Dashboard
+
+![Customer Churn Prediction Dashboard](reports/screenshots/Dashboard.png)
+
+### Prediction Result
+
+![Customer Churn Prediction Result](reports/screenshots/Prediction.png)
+
 ---
 
 ## Contents
@@ -69,6 +79,7 @@ This system answers: **"How likely is this customer to churn, should we act, and
                                                                                           → Pipeline.predict_proba()
                                                                                           → threshold + risk band
 ```
+
 
 **Serving path:** Streamlit → FastAPI → `churn.predict` → saved Pipeline artifact.
 
